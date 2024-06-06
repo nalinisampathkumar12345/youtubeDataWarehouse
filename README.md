@@ -1,6 +1,8 @@
 YouTube Data Harvesting and Warehousing
 This project aims to collect data from YouTube channels using the YouTube Data API and store it in a PostgreSQL database for further analysis.
 
+pip install streamlit
+
 **Installation**
 **Clone the repository:**
 
