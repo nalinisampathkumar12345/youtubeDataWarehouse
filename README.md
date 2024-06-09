@@ -12,7 +12,7 @@ cd your-repository
 
 Set up PostgreSQL database:
 Create a PostgreSQL database.
-Update the database connection details in the code (main.py).
+Update the database connection details in the code.
 Usage
 Run the Streamlit app:
 streamlit run app.py
