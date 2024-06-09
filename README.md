@@ -37,8 +37,6 @@ I) Processing and  Managing Data
 
 main()   - fetching data , store data in data base, search , clean , delete 
 
-
-
 1 .Storing Data
 --------------
 
@@ -55,16 +53,13 @@ store_video_data(video_data, channel_id, db_connection, cursor):
 -------
 search_database(query, db_connection):
 
-3. Delete data
+**3. Delete data**
 -------------
 delete_data(db_connection):
 
 4.** Processing Data**
 --------------
-
 clean_data(db_connection):
-
-
 
 5**. Validating data **
 -------------------
