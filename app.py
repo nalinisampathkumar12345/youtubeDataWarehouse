@@ -1,7 +1,12 @@
 import streamlit as st
 import psycopg2
 import pandas as pd
+import re
+import isodate
 from googleapiclient.discovery import build 
+
+
+
 
 st.markdown("""
     <style>
@@ -24,7 +29,10 @@ def main():
         channel_ids = st.text_input("Enter YouTube Channel IDs (separated by commas):")
 
         if st.button("Collect Data"):
-            channel_ids = channel_ids.split(",")
+            if channel_ids:
+              channel_ids = channel_ids.split(",")
+            else:
+              st.error("Please provide channel IDs")   
             for channel_id in channel_ids:
                 data = fetch_youtube_data(channel_id)
                 store_in_database(data, db_connection)
@@ -172,10 +180,6 @@ def main():
                 execute_and_display_query(query, db_connection)
 
 
-
-
-
-
 # Function to fetch data from YouTube Data API
 
 def fetch_youtube_data(channel_id):
@@ -235,11 +239,6 @@ def fetch_comments_for_video(video_id):
         return None
 
 
-
-
-
-
-
 def store_comment_data(comment_data, video_id, db_connection, cursor):
     if comment_data and 'items' in comment_data:
         for item in comment_data['items']:
@@ -280,7 +279,24 @@ def store_playlist_data(playlist_info, channel_id, db_connection, cursor):
         print("No playlist information provided.")
 
 
+def fetch_videos_statistics(video_ids):
+    youtube = build('youtube', 'v3', developerKey='AIzaSyDeUgn72K5XTlJpo3iDFZCckaWsVOdgoRE')
+    statistics = []
 
+    request = youtube.videos().list(
+        part="statistics,contentDetails",
+        id=",".join(video_ids)
+    )
+    response = request.execute()
+    for item in response.get('items', []):
+        stats = item.get('statistics', {})
+        content_details = item.get('contentDetails', {})
+        #st.success(content_details)
+        stats['duration'] = content_details.get('duration', 0)
+        #t.success(stats)
+        statistics.append(stats)
+
+    return statistics
 
 
 # Function to store playlist data from YouTube Data API
@@ -313,25 +329,30 @@ def fetch_videos_for_playlist(playlist_id):
         st.error("Invalid playlist ID format. Expected string or dictionary.")
         return None
 
-def store_video_data(video_data, channel_id, db_connection, cursor):
-    #st.write(video_data)  # Print the data to debug
 
-    for item in video_data.get('items', []):
+def store_video_data(video_data, channel_id, db_connection, cursor):
+    video_ids = [item['contentDetails']['videoId'] for item in video_data.get('items', [])]
+    video_statistics = fetch_videos_statistics(video_ids)
+
+    for item, stats in zip(video_data.get('items', []), video_statistics):
         if isinstance(item, dict):
             content_details = item.get('contentDetails', {})
             snippet = item.get('snippet', {})
-            statistics = item.get('statistics', {})
-
+            #st.success(content_details)
             video_id = content_details.get('videoId', '')
             video_title = snippet.get('title', '')
             video_description = snippet.get('description', '')
             published_date = snippet.get('publishedAt', '')
-            views_count = statistics.get('viewCount', 0)
-            like_count = statistics.get('likeCount', 0)
-            dislikes_count = statistics.get('dislikeCount', 0)
-            favorite_count = statistics.get('favoriteCount', 0)
-            comment_count = statistics.get('commentCount', 0)
-            duration = content_details.get('duration', 0)
+            views_count = stats.get('viewCount', 0)
+            like_count = stats.get('likeCount', 0)
+            dislikes_count = stats.get('dislikeCount', 0)
+            favorite_count = stats.get('favoriteCount', 0)
+            comment_count = stats.get('commentCount', 0)
+            
+            iso_duration = stats.get('duration', 'PT0S')
+            if not isinstance(iso_duration, str):
+              iso_duration = 'PT0S'
+            duration = int(isodate.parse_duration(iso_duration).total_seconds())  # Convert to seconds
             thumbnail = snippet.get('thumbnails', {}).get('default', {}).get('url', '')
             caption_status = content_details.get('caption', '')
 
@@ -345,9 +366,10 @@ def store_video_data(video_data, channel_id, db_connection, cursor):
                 (video_id, video_title, video_description, published_date, views_count, like_count, dislikes_count,
                  favorite_count, comment_count, duration, thumbnail, caption_status, channel_id)
             )
+            
             comments = fetch_comments_for_video(video_id)
-            #st.success(comments)
             store_comment_data(comments, video_id, db_connection, cursor)
+
 
 def store_in_database(data, db_connection):
     with db_connection.cursor() as cursor:
