@@ -1,4 +1,5 @@
-YouTube Data Harvesting and Warehousing
+YouTube Data Harvesting and Warehousing  
+Demo Video  - https://www.loom.com/share/a34ae29b1ab84ae388b2fde582d90dc2
 This project aims to collect data from YouTube channels using the YouTube Data API and store it in a PostgreSQL database for further analysis.
 
 pip install streamlit
