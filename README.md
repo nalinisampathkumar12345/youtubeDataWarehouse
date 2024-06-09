@@ -38,7 +38,7 @@ Data Storage: The fetched data is stored in a PostgreSQL database using the stor
 Search Database: Users can search and retrieve data from the PostgreSQL database using the Streamlit app.
 Contributing
 Contributions are welcome! Please follow these guidelines when contributing:
-
+----------------------------------------------------------------------------------------------------------------------------------------------
 **CODE details**
 19 methods created for the following 
 
@@ -163,4 +163,5 @@ CREATE TABLE Video (
     FOREIGN KEY (channel_id) REFERENCES Channel(channel_id) ON DELETE CASCADE
 );
 
+-----------------------------------------------------------------------------------------------------------------------------------
 
