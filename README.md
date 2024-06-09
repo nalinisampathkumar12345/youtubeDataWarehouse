@@ -16,7 +16,18 @@ Update the database connection details in the code (main.py).
 Usage
 Run the Streamlit app:
 streamlit run app.py
+-------------------------------------------------------
+**Apllication Cloning : https://github.com/nalinisampathkumar12345/youtubeDataWarehouse/blob/main/app.py**
 
+**Sample Data :**
+YoutubedataharvestingWarehouse
+AIzaSyDeUgn72K5XTlJpo3iDFZCckaWsVOdgoRE - api key
+
+UCsNxHPbaCWL1tKw2hxGQD6g, UCRzYN32xtBf3Yxsx5BvJWJw, UC3uJIdRFTGgLWrUziaHbzrg,UCY6KjrDBN_tIRFT_QNqQbRQ,UCBnZ16ahKA2DZ_T5W0FPUXg - channeled
+
+UCI_mwTKUhicNzFrhm33MzBQ,UCqOxDZvr1uFgENnD1GJ9CVg,UChftTVI0QJmyXkajQYt2tiQ,UCcEb7YNDNBkU0hlrTjH7PfQ,UCVlWr_LN9y80smEMr0KTBOA
+
+**Apllication Funcionality**
 Select the desired option from the sidebar: "Collect Data" to fetch data from YouTube channels or "Search Database" to search and retrieve data from the PostgreSQL database.
 
 Follow the instructions in the Streamlit app to collect data or search the database.
@@ -100,5 +111,56 @@ III) Displaying the data in streamlit
 execute_and_display_query(query, db_connection):
 
 
+-------------------------------------------------
+**Table Script **
+
+Table script 
+
+CREATE TABLE Channel (
+    channel_id VARCHAR(255) PRIMARY KEY,
+    channel_name VARCHAR(255),
+    channel_type VARCHAR(255),
+    channel_view BIGINT,
+    channel_description TEXT,+
+
+
+    channel_status VARCHAR(255)
+);
+
+-- Table definition for Play_List
+CREATE TABLE Play_List (
+    playlist_id VARCHAR(255) PRIMARY KEY,
+    channel_id VARCHAR(255),
+    playlist_name VARCHAR(255),
+    FOREIGN KEY (channel_id) REFERENCES Channel(channel_id) ON DELETE CASCADE
+);
+
+-- Table definition for Comment_details
+CREATE TABLE Comment_details (
+    comment_id VARCHAR(255) PRIMARY KEY,
+    video_id VARCHAR(20),
+    comment_text TEXT,
+    commenter_author VARCHAR(255),
+    comment_published_date TIMESTAMP,
+    FOREIGN KEY (video_id) REFERENCES Video(video_id) ON DELETE CASCADE
+);
+
+CREATE TABLE Video (
+    video_id VARCHAR(255) PRIMARY KEY,
+    video_title VARCHAR(255),
+    video_name VARCHAR(255),
+    video_description TEXT,
+    published_date TIMESTAMP,
+    views_count BIGINT,
+    like_count BIGINT,
+    dislikes_count BIGINT,
+    favorite_count BIGINT,
+    comment_count BIGINT,
+    duration INTEGER,
+    thumbnail VARCHAR(255),
+    caption_status VARCHAR(255),
+    channel_id VARCHAR(255),  -- Foreign key referencing Channel table
+    FOREIGN KEY (channel_id) REFERENCES Channel(channel_id) ON DELETE CASCADE
+);
 
 
