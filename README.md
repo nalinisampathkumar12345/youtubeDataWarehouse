@@ -39,7 +39,7 @@ Search Database: Users can search and retrieve data from the PostgreSQL database
 Contributing
 Contributions are welcome! Please follow these guidelines when contributing:
 
-*CODE details*
+**CODE details**
 19 methods created for the following 
 
 
