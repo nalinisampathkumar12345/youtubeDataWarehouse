@@ -10,9 +10,12 @@ pip install streamlit
 git clone https://github.com/your-username/your-repository.git
 cd your-repository
 
-Set up PostgreSQL database:
+Set up PostgreSQL database.
+
 Create a PostgreSQL database.
+
 Update the database connection details in the code.
+
 Usage
 Run the Streamlit app:
 streamlit run app.py
