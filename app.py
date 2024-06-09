@@ -22,6 +22,10 @@ st.markdown("""
 
 def main():
    
+    if st.sidebar.button("Create Table"):
+       drop_tables(db_connection)
+       create_tables_if_not_exist(db_connection)
+  
     option = st.sidebar.selectbox("Select Option", ["Collect Data", "Search Database",])
 
     if option == "Collect Data":
@@ -32,8 +36,13 @@ def main():
             if channel_ids:
               channel_ids = channel_ids.split(",")
             else:
-              st.error("Please provide channel IDs")   
+              st.error("Please provide channel IDs") 
+              return None
             for channel_id in channel_ids:
+                if is_channel_id_exists(channel_id, db_connection):
+                  st.error(f"Channel {channel_id} already exists in the database. Skipping.")
+                  return None
+                  
                 data = fetch_youtube_data(channel_id)
                 store_in_database(data, db_connection)
                 
@@ -178,6 +187,138 @@ def main():
                 """
                 
                 execute_and_display_query(query, db_connection)
+
+def is_channel_id_exists(channel_id, db_connection):
+    cursor = db_connection.cursor()
+    cursor.execute("SELECT 1 FROM Channel WHERE channel_id = %s", (channel_id,))
+    exists = cursor.fetchone() is not None
+    cursor.close()
+    return exists
+
+def table_exists(cursor, table_name):
+    cursor.execute("""
+        SELECT EXISTS (
+            SELECT FROM information_schema.tables 
+            WHERE table_schema = 'public' 
+            AND table_name = %s
+        );
+    """, (table_name,))
+    return cursor.fetchone()[0]
+
+def drop_table_if_exists(cursor, table_name):
+    if table_exists(cursor, table_name):
+        cursor.execute(f"DROP TABLE {table_name} CASCADE;")
+        st.success(f"Table {table_name} dropped successfully.")
+    else:
+        st.info(f"Table {table_name} does not exist.")
+
+def drop_tables(db_connection):
+    try:
+        cursor = db_connection.cursor()
+
+        drop_table_if_exists(cursor, 'Comment_details')
+        drop_table_if_exists(cursor, 'Video')
+        drop_table_if_exists(cursor, 'Play_List')
+        drop_table_if_exists(cursor, 'Channel')
+
+        db_connection.commit()
+    except psycopg2.Error as e:
+        st.error(f"Error dropping tables: {e}")
+    finally:
+        cursor.close()
+
+
+def drop_tables(db_connection):
+    try:
+      cursor = db_connection.cursor()
+    
+      drop_channel_table = "DROP TABLE IF EXISTS Channel CASCADE;"
+      drop_playlist_table = "DROP TABLE IF EXISTS Play_List CASCADE;"
+      drop_comment_details_table = "DROP TABLE IF EXISTS Comment_details CASCADE;"
+      drop_video_table = "DROP TABLE IF EXISTS Video CASCADE;"
+
+      cursor.execute(drop_channel_table)
+      cursor.execute(drop_playlist_table)
+      cursor.execute(drop_comment_details_table)
+      cursor.execute(drop_video_table)
+
+      db_connection.commit()
+    except psycopg2.Error as e:
+        st.error(f"Error dropping tables: {e}")
+    finally:
+        cursor.close()
+
+
+
+
+def create_tables_if_not_exist(db_connection):
+    try:
+        cursor = db_connection.cursor()
+        
+        # Define table creation queries
+        create_channel_table = """
+        CREATE TABLE IF NOT EXISTS Channel (
+            channel_id VARCHAR(255) PRIMARY KEY,
+            channel_name VARCHAR(255),
+            channel_type VARCHAR(255),
+            channel_view BIGINT,
+            channel_description TEXT,
+            channel_status VARCHAR(255)
+        );
+        """
+        
+        create_playlist_table = """
+        CREATE TABLE IF NOT EXISTS Play_List (
+            playlist_id VARCHAR(255) PRIMARY KEY,
+            channel_id VARCHAR(255),
+            playlist_name VARCHAR(255),
+            FOREIGN KEY (channel_id) REFERENCES Channel(channel_id) ON DELETE CASCADE
+        );
+        """
+        
+        create_comment_details_table = """
+        CREATE TABLE IF NOT EXISTS Comment_details (
+            comment_id VARCHAR(255) PRIMARY KEY,
+            video_id VARCHAR(20),
+            comment_text TEXT,
+            commenter_author VARCHAR(255),
+            comment_published_date TIMESTAMP,
+            FOREIGN KEY (video_id) REFERENCES Video(video_id) ON DELETE CASCADE
+        );
+        """
+        
+        create_video_table = """
+        CREATE TABLE IF NOT EXISTS Video (
+            video_id VARCHAR(255) PRIMARY KEY,
+            video_title VARCHAR(255),
+            video_name VARCHAR(255),
+            video_description TEXT,
+            published_date TIMESTAMP,
+            views_count BIGINT,
+            like_count BIGINT,
+            dislikes_count BIGINT,
+            favorite_count BIGINT,
+            comment_count BIGINT,
+            duration INTEGER,
+            thumbnail VARCHAR(255),
+            caption_status VARCHAR(255),
+            channel_id VARCHAR(255),  -- Foreign key referencing Channel table
+            FOREIGN KEY (channel_id) REFERENCES Channel(channel_id) ON DELETE CASCADE
+        );
+        """
+        
+        # Execute table creation queries
+        cursor.execute(create_channel_table)
+        cursor.execute(create_playlist_table)
+        cursor.execute(create_video_table)
+        cursor.execute(create_comment_details_table)
+        
+        db_connection.commit()
+        st.success("Table Created")
+    except psycopg2.Error as e:
+        st.error(f"Error creating tables: {e}")
+    finally:
+        cursor.close()
 
 
 # Function to fetch data from YouTube Data API
