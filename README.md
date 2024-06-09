@@ -13,8 +13,49 @@ cd your-repository
 Set up PostgreSQL database.
 
 Create a PostgreSQL database.
-
+----------------------------------------------------------------------------------
 Update the database connection details in the code.
+Obtain YouTube API Key:
+Obtain an API key for the YouTube Data API v3 from the Google Cloud Console. This API key will allow your app to access YouTube data.
+
+Update Connection Details:
+Update the database connection details (host, port, database name, username, password) in the code to match your PostgreSQL setup.
+
+Run the Streamlit App:
+Execute the Python script containing the Streamlit app by running:
+
+arduino
+Copy code
+streamlit run your_script.py
+Using the App:
+
+The app interface will open in your default web browser.
+You'll see a title "YouTube Data Harvesting and Warehousing" along with options in the sidebar.
+The "Create Table" button initializes the database tables. Use it if you're running the app for the first time.
+Choose between "Collect Data" and "Search Database" options from the sidebar.
+If you select "Collect Data":
+Enter YouTube channel IDs separated by commas in the text input field.
+Click the "Collect Data" button to fetch data for the provided channel IDs from the YouTube Data API. The data will be stored in your PostgreSQL database.
+Use the "Clean" button to clean the data and replace any empty values with 'NA'.
+Use the "Delete" button to delete all data from the database.
+If you select "Search Database":
+Choose a query type from the dropdown menu.
+Click the "Search" button to execute the selected query on the database. Results will be displayed in a table below.
+You can interact with the app by clicking buttons and selecting options as needed.
+Interpret Results:
+
+The app displays data fetched from the YouTube API and stored in the PostgreSQL database.
+Search query results are displayed in tabular format, making it easy to interpret and analyze the data.
+Further Customization:
+
+You can modify the app code to add more functionality or customize the interface according to your requirements.
+Ensure proper error handling and data validation to handle edge cases and user inputs effectively.
+By following these steps, you can effectively use this Streamlit app to harvest YouTube data, store it in a PostgreSQL database, and perform various queries to analyze the data.
+
+
+
+
+
 
 Usage
 Run the Streamlit app:
